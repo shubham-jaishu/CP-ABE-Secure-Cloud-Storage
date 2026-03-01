@@ -1,0 +1,1 @@
+Patient Record: John Doe, Age 45, Diagnosis: Hypertension

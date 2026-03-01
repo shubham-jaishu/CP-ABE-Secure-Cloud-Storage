@@ -1,0 +1,160 @@
+╔═══════════════════════════════════════════════════════════════╗
+║     WORKING DEMO EXAMPLES - COPY & PASTE THESE!               ║
+╚═══════════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════
+🎯 EXAMPLE 1: Healthcare Records (Simple)
+═══════════════════════════════════════════════════════════════
+
+# Create file
+echo "Patient: John Doe - Medical Record" > medical.txt
+
+# Encrypt with simple policy
+curl -X POST http://localhost:8080/encrypt \
+  -F "file=@medical.txt" \
+  -F "policy=Role=Doctor"
+
+# Try with WRONG role (Nurse) → DENIED ❌
+curl -X POST http://localhost:8080/decrypt \
+  -H "Content-Type: application/json" \
+  -d '{"encrypted_filename": "encrypted_medical.txt", "user_attributes": {"Role": "Nurse"}}'
+
+# Try with CORRECT role (Doctor) → GRANTED ✅
+curl -X POST http://localhost:8080/decrypt \
+  -H "Content-Type: application/json" \
+  -d '{"encrypted_filename": "encrypted_medical.txt", "user_attributes": {"Role": "Doctor"}}' \
+  --output decrypted_medical.txt && cat decrypted_medical.txt
+
+
+═══════════════════════════════════════════════════════════════
+🎯 EXAMPLE 2: Financial Data (AND Policy)
+═══════════════════════════════════════════════════════════════
+
+# Create file
+echo "Q4 Financial Report - Confidential" > finance.txt
+
+# Encrypt with AND policy (need BOTH conditions)
+curl -X POST http://localhost:8080/encrypt \
+  -F "file=@finance.txt" \
+  -F "policy=Role=Manager AND Department=Finance"
+
+# Try with only Manager (missing Department) → DENIED ❌
+curl -X POST http://localhost:8080/decrypt \
+  -H "Content-Type: application/json" \
+  -d '{"encrypted_filename": "encrypted_finance.txt", "user_attributes": {"Role": "Manager"}}'
+
+# Try with Manager in Finance → GRANTED ✅
+curl -X POST http://localhost:8080/decrypt \
+  -H "Content-Type: application/json" \
+  -d '{"encrypted_filename": "encrypted_finance.txt", "user_attributes": {"Role": "Manager", "Department": "Finance"}}' \
+  --output decrypted_finance.txt && cat decrypted_finance.txt
+
+
+═══════════════════════════════════════════════════════════════
+🎯 EXAMPLE 3: Admin Files (OR Policy)
+═══════════════════════════════════════════════════════════════
+
+# Create file
+echo "System Configuration - Admin Access Required" > admin.txt
+
+# Encrypt with OR policy (either condition works)
+curl -X POST http://localhost:8080/encrypt \
+  -F "file=@admin.txt" \
+  -F "policy=Role=Admin OR Role=SysOps"
+
+# Try with regular User → DENIED ❌
+curl -X POST http://localhost:8080/decrypt \
+  -H "Content-Type: application/json" \
+  -d '{"encrypted_filename": "encrypted_admin.txt", "user_attributes": {"Role": "User"}}'
+
+# Try with SysOps (matches OR condition) → GRANTED ✅
+curl -X POST http://localhost:8080/decrypt \
+  -H "Content-Type: application/json" \
+  -d '{"encrypted_filename": "encrypted_admin.txt", "user_attributes": {"Role": "SysOps"}}' \
+  --output decrypted_admin.txt && cat decrypted_admin.txt
+
+
+═══════════════════════════════════════════════════════════════
+🚀 QUICK START - RUN THE INTERACTIVE DEMO
+═══════════════════════════════════════════════════════════════
+
+./demo_live.sh
+
+This will walk you through a complete demo step-by-step!
+
+
+═══════════════════════════════════════════════════════════════
+📋 VIEW ALL ENCRYPTED FILES
+═══════════════════════════════════════════════════════════════
+
+curl -s http://localhost:8080/list | python3 -m json.tool
+
+
+═══════════════════════════════════════════════════════════════
+📊 VIEW SYSTEM METRICS
+═══════════════════════════════════════════════════════════════
+
+curl -s http://localhost:8080/metrics | python3 -m json.tool
+
+
+═══════════════════════════════════════════════════════════════
+✅ VERIFY EVERYTHING WORKS
+═══════════════════════════════════════════════════════════════
+
+./verify_demo.sh
+
+
+═══════════════════════════════════════════════════════════════
+🎯 FOR YOUR ACTUAL DEMO - USE THESE FILES
+═══════════════════════════════════════════════════════════════
+
+Already encrypted files you can use:
+
+1. encrypted_test_medical_record.txt
+   Policy: Role=Doctor AND Department=CSE
+   Decrypt with: {"Role": "Doctor", "Department": "CSE"}
+
+2. encrypted_patient_record.txt
+   Policy: Role=Doctor
+   Decrypt with: {"Role": "Doctor"}
+
+3. encrypted_test_or_policy.txt
+   Policy: Role=Doctor OR Role=Admin
+   Decrypt with: {"Role": "Admin"}
+
+
+═══════════════════════════════════════════════════════════════
+💡 PRO TIP
+═══════════════════════════════════════════════════════════════
+
+For demo, create FRESH files so you know exactly what the policy is:
+
+1. Create fresh file
+2. Encrypt with YOUR chosen policy
+3. Demo access denied with wrong attributes
+4. Demo access granted with correct attributes
+
+This way you control the demo completely!
+
+
+═══════════════════════════════════════════════════════════════
+🎬 RECOMMENDED DEMO FLOW
+═══════════════════════════════════════════════════════════════
+
+1. Run: ./demo_live.sh
+   → Shows complete flow automatically
+
+2. OR manually:
+   - Create file
+   - Encrypt with policy
+   - Show denied access
+   - Show granted access
+   - Show web interface
+
+3. Then show:
+   - curl http://localhost:8080/list (all files)
+   - curl http://localhost:8080/metrics (system metrics)
+   - python3 test_system.py (run all tests)
+
+
+═══════════════════════════════════════════════════════════════
